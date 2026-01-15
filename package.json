@@ -30,14 +30,15 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "node server.js",
-		"dev": "nodemon server.js"
+		"dev": "nodemon server.js",
+		"rtserver": "node rtserver.js"
 	},
 	"dependencies": {
 		"dotenv": "^17.2.3",
-		"eslint": "^9.39.2",
 		"node-telegram-bot-api": "^0.67.0"
 	},
 	"devDependencies": {
+		"eslint": "^9.39.2",
 		"nodemon": "^3.1.11"
 	}
 }
