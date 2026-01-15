@@ -49,3 +49,7 @@ next-env.d.ts
 .vscode/
 .idea/
 *.code-workspace
+
+# Project files
+.telegram-claude-state.json
+
