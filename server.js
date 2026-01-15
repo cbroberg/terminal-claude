@@ -308,6 +308,48 @@ bot.onText(/^\/ls(?:\s+(.+))?$/, (msg, match) => {
 
 		const dirs = [];
 		const filesList = [];
+
+		files.forEach(file => {
+			const itemPath = path.join(fullPath, file);
+			const isDir = statSync(itemPath).isDirectory();
+			if (isDir) {
+				dirs.push(`📂 ${file}/`);
+			} else {
+				filesList.push(`📄 ${file}`);
+			}
+		});
+
+		const formattedList = [...dirs, ...filesList].join('\n');
+		const currentPath = subPath ? `📂 ${subPath}` : '📂 root';
+		const count = `(${files.length} items)`;
+		bot.sendMessage(msg.chat.id, `${currentPath} ${count}\n\n${formattedList}`);
+	});
+});
+
+// Command: /l - List files with GitHub links
+bot.onText(/^\/l(?:\s+(.+))?$/, (msg, match) => {
+	if (msg.chat.id.toString() !== ALLOWED_CHAT_ID) return;
+	if (!currentRepo) {
+		return bot.sendMessage(msg.chat.id, '⚠️ Please select a repo first using /repos');
+	}
+
+	const subPath = match[1]?.trim() || '';
+	const fullPath = path.join(REPOS[currentRepo], subPath);
+
+	exec(`ls -1 "${fullPath}"`, (error, stdout, stderr) => {
+		if (error) {
+			return bot.sendMessage(msg.chat.id, `❌ Error: ${stderr}`);
+		}
+
+		const files = stdout.trim().split('\n').filter(f => f);
+
+		if (files.length === 0) {
+			const currentPath = subPath ? `${subPath}` : 'root';
+			return bot.sendMessage(msg.chat.id, `📁 ${currentPath}\n\n(empty)`);
+		}
+
+		const dirs = [];
+		const filesList = [];
 		const baseGithubUrl = GITHUB_URLS[currentRepo];
 		// Convert local path to GitHub path format (replace backslashes and clean up)
 		const githubSubPath = subPath
@@ -321,37 +363,19 @@ bot.onText(/^\/ls(?:\s+(.+))?$/, (msg, match) => {
 				const githubPath = githubSubPath
 					? `${baseGithubUrl}/tree/main/${githubSubPath}/${file}`
 					: `${baseGithubUrl}/tree/main/${file}`;
-				dirs.push(`📂 [${file}/](${githubPath})`);
+				dirs.push(`📂 <a href="${githubPath}">${file}/</a>`);
 			} else {
 				const githubPath = githubSubPath
 					? `${baseGithubUrl}/blob/main/${githubSubPath}/${file}`
 					: `${baseGithubUrl}/blob/main/${file}`;
-				filesList.push(`📄 [${file}](${githubPath})`);
+				filesList.push(`📄 <a href="${githubPath}">${file}</a>`);
 			}
 		});
 
 		const formattedList = [...dirs, ...filesList].join('\n');
 		const currentPath = subPath ? `📂 ${subPath}` : '📂 root';
 		const count = `(${files.length} items)`;
-		bot.sendMessage(msg.chat.id, `${currentPath} ${count}\n\n${formattedList}`, { parse_mode: 'Markdown' });
-	});
-});
-
-// Command: /l - List files in current directory (detailed)
-bot.onText(/\/l(.*)/, (msg, match) => {
-	if (msg.chat.id.toString() !== ALLOWED_CHAT_ID) return;
-	if (!currentRepo) {
-		return bot.sendMessage(msg.chat.id, '⚠️ Please select a repo first using /repos');
-	}
-
-	const subPath = match[1].trim() || '';
-	const fullPath = path.join(REPOS[currentRepo], subPath);
-
-	exec(`ls -la "${fullPath}"`, (error, stdout, stderr) => {
-		if (error) {
-			return bot.sendMessage(msg.chat.id, `❌ Error: ${stderr}`);
-		}
-		bot.sendMessage(msg.chat.id, `📁 ${subPath || '/'}\n${stdout}`);
+		bot.sendMessage(msg.chat.id, `${currentPath} ${count}\n\n${formattedList}`, { parse_mode: 'HTML' });
 	});
 });
 
