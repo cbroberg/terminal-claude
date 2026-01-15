@@ -52,4 +52,4 @@ next-env.d.ts
 
 # Project files
 .telegram-claude-state.json
-
+bot.log

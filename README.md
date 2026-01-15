@@ -10,7 +10,8 @@ Copyright (c) 2025 Christian Broberg
 - `/status` - Show active repository
 
 ### File Commands
-- `/ls path` - List files
+- `/ls [path]` - List files (mobile-optimized: folders & files with icons)
+- `/l [path]` - List files (detailed: sizes, permissions, owner)
 - `/cat <file>` - Show file content
 
 ### Git Commands

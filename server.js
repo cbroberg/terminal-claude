@@ -275,8 +275,8 @@ bot.onText(/\/status/, (msg) => {
 	}
 });
 
-// Command: /l - List files (mobile-optimized with icons)
-bot.onText(/\/l(?:\s+(.*))?/, (msg, match) => {
+// Command: /ls - List files (mobile-optimized with icons)
+bot.onText(/\/ls(?:\s+(.*))?/, (msg, match) => {
 	if (msg.chat.id.toString() !== ALLOWED_CHAT_ID) return;
 	if (!currentRepo) {
 		return bot.sendMessage(msg.chat.id, '⚠️ Please select a repo first using /repos');
@@ -317,8 +317,8 @@ bot.onText(/\/l(?:\s+(.*))?/, (msg, match) => {
 	});
 });
 
-// Command: /ls - List files in current directory (detailed)
-bot.onText(/\/ls(.*)/, (msg, match) => {
+// Command: /l - List files in current directory (detailed)
+bot.onText(/\/l(.*)/, (msg, match) => {
 	if (msg.chat.id.toString() !== ALLOWED_CHAT_ID) return;
 	if (!currentRepo) {
 		return bot.sendMessage(msg.chat.id, '⚠️ Please select a repo first using /repos');
