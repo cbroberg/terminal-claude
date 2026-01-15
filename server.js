@@ -20,6 +20,15 @@ const REPOS = {
 	'experiments': '/Users/cb/Apps/cbroberg/experiments'
 };
 
+// GitHub URLs for each repository
+const GITHUB_URLS = {
+	'mobile': 'https://github.com/cbroberg/flutter-mini-app',
+	'movie': 'https://github.com/cbroberg/torrent-search-api',
+	'codescan': 'https://github.com/cbroberg/codescan',
+	'tcc': 'https://github.com/cbroberg/terminal-claude',
+	'experiments': 'https://github.com/cbroberg/experiments'
+};
+
 // State management
 const STATE_FILE = '.telegram-claude-state.json';
 let currentRepo = null;
@@ -276,7 +285,7 @@ bot.onText(/\/status/, (msg) => {
 });
 
 // Command: /ls - List files (mobile-optimized with icons)
-bot.onText(/\/ls(?:\s+(.*))?/, (msg, match) => {
+bot.onText(/^\/ls(?:\s+(.+))?$/, (msg, match) => {
 	if (msg.chat.id.toString() !== ALLOWED_CHAT_ID) return;
 	if (!currentRepo) {
 		return bot.sendMessage(msg.chat.id, '⚠️ Please select a repo first using /repos');
@@ -299,21 +308,32 @@ bot.onText(/\/ls(?:\s+(.*))?/, (msg, match) => {
 
 		const dirs = [];
 		const filesList = [];
+		const baseGithubUrl = GITHUB_URLS[currentRepo];
+		// Convert local path to GitHub path format (replace backslashes and clean up)
+		const githubSubPath = subPath
+			? subPath.split(path.sep).join('/').replace(/\/$/, '')
+			: '';
 
 		files.forEach(file => {
 			const itemPath = path.join(fullPath, file);
 			const isDir = statSync(itemPath).isDirectory();
 			if (isDir) {
-				dirs.push(`📂 ${file}/`);
+				const githubPath = githubSubPath
+					? `${baseGithubUrl}/tree/main/${githubSubPath}/${file}`
+					: `${baseGithubUrl}/tree/main/${file}`;
+				dirs.push(`📂 [${file}/](${githubPath})`);
 			} else {
-				filesList.push(`📄 ${file}`);
+				const githubPath = githubSubPath
+					? `${baseGithubUrl}/blob/main/${githubSubPath}/${file}`
+					: `${baseGithubUrl}/blob/main/${file}`;
+				filesList.push(`📄 [${file}](${githubPath})`);
 			}
 		});
 
 		const formattedList = [...dirs, ...filesList].join('\n');
 		const currentPath = subPath ? `📂 ${subPath}` : '📂 root';
 		const count = `(${files.length} items)`;
-		bot.sendMessage(msg.chat.id, `${currentPath} ${count}\n\n${formattedList}`);
+		bot.sendMessage(msg.chat.id, `${currentPath} ${count}\n\n${formattedList}`, { parse_mode: 'Markdown' });
 	});
 });
 
